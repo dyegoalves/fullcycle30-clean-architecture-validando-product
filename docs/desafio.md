@@ -1,43 +1,47 @@
-# Clean Architecture: Notification Pattern na Entidade Product
+# Clean Architecture: Validação Desacoplada na Entidade Product
 
 ## Objetivo
 
-Refatorar a validação da entidade `Product` para utilizar o **Notification Pattern**.
+Replicar o processo de validação desacoplado (já aplicado no `Customer`) para a entidade `Product`.
 
-Substituir o lançamento imediato de exceções (que interrompem o fluxo) por um **container acumulador de erros**, permitindo que a aplicação identifique e reporte todas as inconsistências de uma única vez.
+Retirar as regras de validação diretas da entidade e delegá-las a uma classe validadora especializada, minimizando o acoplamento no domínio.
 
 ## Tecnologias e Ferramentas
 
 - **Linguagem:** TypeScript
-- **Padrão:** Notification Pattern
+- **Padrão:** Validator Pattern / Validation Factory
 - **Testes:** Unitários (Jest ou similar)
 - **Base do Projeto:** Repositório Template (obrigatório)
 
 ## Estrutura Base (Obrigatória)
 
-Obrigatório usar o código base disponibilizado pelo curso:
+Obrigatório continuar usando o código base do curso (ou a evolução do desafio anterior):
 
 - https://github.com/devfullcycle/fc-clean-architecture.git
 
-Projetos que não usarem a estrutura do repositório base não serão aceitos.
+Projetos que não seguirem a estrutura base não serão aceitos.
 
 ## Requisitos Técnicos
 
-### Refatoração
+### Criação do Validator
 
-- Modificar a classe `Product` (e suas validações) para usar o padrão `Notification`.
-- Ao invés de lançar `Error` imediatamente ao quebrar uma regra, a entidade deve adicionar o erro à notificação.
-- A entidade só deve ser considerada inválida se houver erros na notificação.
+- Implementar uma classe de validação específica para a entidade `Product` (`ProductYupValidator`), seguindo o padrão de interfaces definido no módulo (`ValidatorInterface`).
 
-### Validação
+### Desacoplamento
 
-- Garantir que **todas** as regras de negócio atuais da entidade continuem sendo verificadas.
+- Refatorar a entidade `Product` para que ela não valide os dados diretamente (sem `if/else` soltos), mas sim utilize o validador criado.
+- A entidade deve chamar o validador, que por sua vez deve preencher a `Notification` (implementada no desafio anterior) em caso de erros.
 
-## Critérios de Testes (Obrigatório)
+### Integridade
 
-Criar ou adaptar os testes automatizados para validar o novo comportamento.
+- O comportamento externo da entidade não deve mudar. Ela deve continuar rejeitando dados inválidos, mas agora internamente o processo deve ser delegado.
 
-- **Teste de Múltiplos Erros:** teste específico que force **dois erros de validação simultâneos** (ex.: `Name` vazio e `Price` negativo) e verifique se a notificação contém **ambos** os erros.
+## Critérios de Testes (Regressão — Obrigatório)
+
+Trata-se de uma refatoração: é crucial garantir que **todos os testes existentes continuem passando**.
+
+- **Testes Passando:** alterar a implementação (o "como") sem quebrar o comportamento (o "o quê").
+- **Teste de Múltiplos Erros:** manter o teste que force **dois erros simultâneos** (ex.: `Name` vazio e `Price` negativo) e verifique se a notificação contém **ambos** os erros.
 
 ## Entregável
 

@@ -1,39 +1,42 @@
-Título: Clean Architecture: Notification Pattern na Entidade Product
+Título: Clean Architecture: Validação Desacoplada na Entidade Product
 
-Objetivo Neste desafio, você deve refatorar a validação da entidade Product para utilizar o Notification Pattern. O objetivo é substituir o lançamento imediato de exceções (que interrompem o fluxo) por um "container acumulador de erros", permitindo que a aplicação identifique e reporte todas as inconsistências de uma única vez.
+Objetivo Agora que aprendemos a criar um processo de validação desacoplado, sua missão é replicar esse comportamento para a entidade Product. Você deve retirar as regras de validação diretas da entidade e delegá-las a uma classe validadora especializada, minimizando o acoplamento no seu domínio.
 
 Tecnologias e Ferramentas
 
 Linguagem: TypeScript
 
-Padrão: Notification Pattern
+Padrão: Validator Pattern / Validation Factory
 
-Testes: Unitários (Jest ou similar)
+Testes: Unitários
 
 Base do Projeto: Repositório Template (Obrigatório)
 
-Estrutura Base (Obrigatória) Para realizar este desafio, é obrigatório utilizar o código base disponibilizado pelo curso.
+Estrutura Base (Obrigatória) Para realizar este desafio, é obrigatório continuar utilizando o código base do curso (ou a evolução do desafio anterior).
 
 https://github.com/devfullcycle/fc-clean-architecture.git
 
 Requisitos Técnicos
-Refatoração: Modifique a classe Product (e suas validações) para que ela utilize o padrão Notification.
+Criação do Validator: Implemente uma classe de validação específica para a entidade Product ( ProductYupValidator), seguindo o padrão de interfaces definido no módulo.
 
-Ao invés de lançar um Error imediatamente quando uma regra é quebrada, a entidade deve adicionar o erro à notificação.
-A entidade só deve ser considerada inválida se houver erros na notificação.
-Validação: Garanta que todas as regras de negócio atuais da entidade continuem sendo verificadas.
+Desacoplamento: Refatore a entidade Product para que ela não valide os dados diretamente (com if/else soltos), mas sim utilize o validador que você criou.
 
+A entidade deve chamar o validador, que por sua vez deve preencher o Notification (implementado no desafio anterior) em caso de erros.
+Integridade: O comportamento externo da entidade não deve mudar. Ela deve continuar rejeitando dados inválidos, mas agora internamente o processo deve ser delegado.
 
+ 
 
-Critérios de Testes (Obrigatório) Você deve criar ou adaptar os testes automatizados para validar o novo comportamento.
+Critérios de Testes (Regressão)
 
-Teste de Múltiplos Erros: É obrigatório criar um teste específico que force dois erros de validação simultâneos (ex: Name vazio e Price negativo) e verifique se a notificação contém ambos os erros.
+Testes Passando: Como se trata de uma refatoração, é crucial garantir que todos os testes existentes continuem passando.
+
+O objetivo é alterar a implementação (o "como"), sem quebrar o comportamento (o "o quê").
 
 Entregável
 
-Link do Repositório: O link para o seu repositório no GitHub contendo o código refatorado e os testes.
+Link do Repositório: O link para o seu repositório no GitHub contendo a implementação.
 
-README: Instruções de como rodar os testes.
+README: Instruções de execução dos testes.
 
 Regras de Entrega
 
@@ -41,5 +44,4 @@ Repositório Único: É obrigatória a entrega de apenas um projeto por reposit�
 
 Branch Principal: Todo o código deve estar na branch main.
 
-Base Obrigatória: Projetos que não utilizarem a estrutura do repositório base fornecido não serão aceitos.
-
+Base Obrigatória: Projetos que não seguirem a estrutura base não serão aceitos.

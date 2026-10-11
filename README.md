@@ -1,8 +1,10 @@
-# Clean Architecture: Notification Pattern na Entidade Product
+# Clean Architecture: Validação Desacoplada na Entidade Product
 
-Refatoração da validação da entidade `Product` para o **Notification Pattern**, substituindo o lançamento imediato de exceções por um acumulador de erros.
+Refatoração da validação da entidade `Product` para delegar as regras a uma classe validadora especializada (`ProductYupValidator`), em vez de validar com `if/else` soltos na própria entidade.
 
-Base: [devfullcycle/fc-clean-architecture](https://github.com/devfullcycle/fc-clean-architecture.git)
+A entidade chama o validador via factory; o validador preenche a `Notification` (Notification Pattern) em caso de erros, sem acoplar o domínio ao Yup.
+
+Base: repositório base do curso ([devfullcycle/fc-clean-architecture](https://github.com/devfullcycle/fc-clean-architecture.git)), evoluído a partir do desafio anterior de Notification Pattern.
 
 ## Como rodar os testes
 
@@ -31,25 +33,19 @@ Abrir http://localhost:3000. Form: deixe **Name vazio** e **Price negativo** →
 
 Endpoint: `POST /product` → `201` com o produto, ou `400` com `{ "errors": [...] }`.
 
-## O que mudou
+## Arquitetura da validação
 
-- `Product` e `ProductB` agora estendem `Entity` (herdam `notification`) e, em vez de lançar `Error` na primeira regra quebrada, **acumulam** os erros na notificação.
-- A entidade só é considerada inválida se houver erros na notificação; ao final da construção, se houver erros, é lançado um `NotificationError` com **todos** eles.
-- Validação delegada a um validator (Yup), no mesmo padrão já usado em `Customer`.
+- `src/domain/@shared/validator/validator.interface.ts` — contrato `ValidatorInterface<T>`.
+- `src/domain/product/validator/product.yup.validator.ts` — regras (`Id`, `Name`, `Price`), implementa `ValidatorInterface<ProductInterface>`.
+- `src/domain/product/factory/product.validator.factory.ts` — factory que cria o validador (`ProductValidatorFactory.create()`).
+- `src/domain/product/entity/product.ts` / `product-b.ts` — entidades: apenas chamam o validador e lançam `NotificationError` se a notificação tiver erros.
 
-Arquivos:
+## Integridade / comportamento mantido
 
-- `src/domain/product/validator/product.yup.validator.ts` — regras (`Id`, `Name`, `Price`).
-- `src/domain/product/factory/product.validator.factory.ts` — factory do validator.
-- `src/domain/product/entity/product.ts` / `product-b.ts` — entidades refatoradas.
-- `src/domain/product/entity/product.spec.ts` — testes, incluindo o de **múltiplos erros simultâneos**.
-
-## Regras de negócio mantidas
-
-- `Id` obrigatório.
-- `Name` obrigatório.
-- `Price` deve ser maior ou igual a zero.
+- `Product` continua **rejeitando dados inválidos**; mesmo comportamento externo, processo interno delegado.
+- Erros **acumulados** na notificação (não interrompe no primeiro), lançados juntos via `NotificationError`.
+- Regras mantidas: `Id` obrigatório, `Name` obrigatório, `Price` maior ou igual a zero.
 
 ## Teste de múltiplos erros
 
-`Name` vazio **e** `Price` negativo ao mesmo tempo: a notificação contém **ambos** os erros (`product: Name is required` e `product: Price must be greater than zero`).
+`Name` vazio **e** `Price` negativo ao mesmo tempo: a notificação contém **ambos** os erros (`product: Name is required` e `product: Price must be greater than zero`). Ver `src/domain/product/entity/product.spec.ts`.
